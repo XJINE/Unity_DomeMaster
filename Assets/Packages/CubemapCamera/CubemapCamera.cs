@@ -29,9 +29,9 @@ public class CubemapCamera : MonoBehaviour, IInitializable
     // Maybe the WarpMode or any other parameters are need not in here.
     // Because these parameters are not important to use Cubemap.
 
-    [Range(0, 16384)] public int  resolution = 4096; // 2^
-    [Range(0,    24)] public int  depth      =   24; // 0, 16, 24
-    [Range(0,    16)] public int  anisoLevel =   16; // 0 ~ 16,
+    [Range(0, 8192)] public int resolution = 4096; // 2^
+    [Range(0,   24)] public int depth      =   24; // 0, 16, 24
+    [Range(0,   16)] public int anisoLevel =   16; // 0 ~ 16,
 
     public bool       mipmap     = false;
     public FilterMode filterMode = FilterMode.Trilinear;
@@ -61,7 +61,7 @@ public class CubemapCamera : MonoBehaviour, IInitializable
     protected virtual void LateUpdate()
     {
         // NOTE:
-        // Do not in Upddate().
+        // Do not in Update().
 
         this.camera.RenderToCubemap(this.Cubemap, (int)this.faceMask);
 
@@ -95,12 +95,18 @@ public class CubemapCamera : MonoBehaviour, IInitializable
     [ContextMenu("Initialize Cubemap")]
     public void InitializeCubemap()
     {
-        const int MaxResolution = 16384; // in DirectX 11, 12.
-        const int MinResolution =     2;
-        const int MaxDepth      =    24;
-        const int MinDepth      =     0;
+        // NOTE:
+        // Resolution means the each square's resolution of Cubemap.
+        // So the MaxResolution 16384 is quite large
+        // and it may will be failed to make the texture.
+        // 8192 is also too large.
 
-        //this.resolution = (int) Mathf.Pow(2, Mathf.Ceil(Mathf.Log(this.resolution)/Mathf.Log(2)));
+        const int MaxResolution = 8192;
+        const int MinResolution =    2;
+        const int MaxDepth      =   24;
+        const int MinDepth      =    0;
+
+        this.resolution = (int)Mathf.Pow(2, Mathf.Ceil(Mathf.Log(this.resolution) / Mathf.Log(2)));
         this.resolution = Mathf.Max(Mathf.Min(this.resolution, MaxResolution), MinResolution);
 
         this.depth = this.depth / 16f < 0.5f ? 0 : this.depth / 16f < 1.25f ? 16 : 24;
